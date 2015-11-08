@@ -1,3 +1,6 @@
 
 [api]
 key = 'your api key'
+
+[config]
+countries = ['USA', 'EU', 'Hongkong', 'Polsko', 'Rusko', 'Chorvatsko']config]

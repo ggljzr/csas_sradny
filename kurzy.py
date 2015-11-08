@@ -34,7 +34,7 @@ def initCurses():
 	curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLACK)
 	curses.init_pair(7, curses.COLOR_BLACK, curses.COLOR_BLACK)
 
-	curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_BLUE)
+	curses.init_pair(8, curses.COLOR_WHITE, curses.COLOR_BLUE)
 
 	curses.noecho()
 	curses.cbreak()
@@ -76,13 +76,21 @@ def draw_country_data(data_window, data, country):
 	data_window.addstr(0,0, 'Země: ' + country)
 	data_window.addstr(1,0, country_data['name'] + ' (' +country_data['shortName'] + ')')
 	data_window.addstr(2,0, 'Platnost: ' + country_data['validFrom'])
-	data_window.addstr(3,0, 'Současný výkup: ' + str(country_data['currBuy']))
-	data_window.addstr(4,0, 'Současný střed: ' + str(country_data['currMid']))
-	data_window.addstr(5,0, 'Současný prodej: ' + str(country_data['currSell']))
-	data_window.addstr(6,0, 'Změna: ' + str(country_data['move']))
-	data_window.addstr(7,0, 'Kurz ČNB: ' + str(country_data['cnbMid']))
+	data_window.addstr(3,0, 'Množství: ' + str(country_data['amount']))
+	data_window.addstr(4,0, 'Současný výkup: ' + str(country_data['currBuy']))
+	data_window.addstr(5,0, 'Současný střed: ' + str(country_data['currMid']))
+	data_window.addstr(6,0, 'Současný prodej: ' + str(country_data['currSell']))
+	data_window.addstr(7,0, 'Změna: ' + str(country_data['move']))
+	data_window.addstr(8,0, 'Kurz ČNB: ' + str(country_data['cnbMid']))
 	
 	data_window.refresh();
+
+def draw_menu_select(menu_window, item, direction):
+	menu_items = len(config['config']['countries'])
+	item_next = (item + direction * -1) % menu_items
+	menu_window.addstr(item, 0, config['config']['countries'][item], curses.color_pair(8) | curses.A_BOLD)
+	menu_window.addstr(item_next,0, config['config']['countries'][item_next])
+	menu_window.refresh()
 
 
 if __name__ == '__main__':
@@ -111,6 +119,7 @@ if __name__ == '__main__':
 	menu_items = len(config['config']['countries'])
 	menu_window = curses.newwin(rows, max_width, 0, 0)
 	draw_countries_menu(menu_window)
+	draw_menu_select(menu_window, 0, 1)
 
 	#okno pro zobrazeni dat zvolene zeme
 	data_window = curses.newwin(rows, 30, 0, max_width + 1)
@@ -122,9 +131,11 @@ if __name__ == '__main__':
 			break
 		if c == curses.KEY_UP:
 			current_item = (current_item - 1) % menu_items
+			draw_menu_select(menu_window, current_item, -1)
 			draw_country_data(data_window, json_data, config['config']['countries'][current_item])
 		if c == curses.KEY_DOWN:
 			current_item = (current_item + 1) % menu_items
+			draw_menu_select(menu_window, current_item, 1)
 			draw_country_data(data_window, json_data, config['config']['countries'][current_item])
 
 	endCurses()
