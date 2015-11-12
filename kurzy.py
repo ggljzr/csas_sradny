@@ -5,6 +5,7 @@ import subprocess
 import curses
 
 import pytoml as toml
+import icons
 
 config_file_path = 'config.toml'
 config = {}
@@ -26,13 +27,10 @@ def initCurses():
 
 	#colors
 	curses.start_color()
-	curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+	curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_BLACK)
 	curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
-	curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
-	curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-	curses.init_pair(5, curses.COLOR_CYAN, curses.COLOR_BLACK)
-	curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLACK)
-	curses.init_pair(7, curses.COLOR_BLACK, curses.COLOR_BLACK)
+	curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+	curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
 
 	curses.init_pair(8, curses.COLOR_WHITE, curses.COLOR_BLUE)
 
@@ -73,6 +71,8 @@ def draw_country_data(data_window, data, country):
 	
 	data_window.clear()
 
+	max_width = len('Současný prodej: ' + str(country_data['currSell']))
+
 	data_window.addstr(0,0, 'Země: ' + country)
 	data_window.addstr(1,0, country_data['name'] + ' (' +country_data['shortName'] + ')')
 	data_window.addstr(2,0, 'Platnost: ' + country_data['validFrom'])
@@ -83,6 +83,14 @@ def draw_country_data(data_window, data, country):
 	data_window.addstr(7,0, 'Změna: ' + str(country_data['move']))
 	data_window.addstr(8,0, 'Kurz ČNB: ' + str(country_data['cnbMid']))
 	
+	icon = icons.none;
+	if country_data['move'] > 0:
+		icon = icons.up
+	elif country_data['move'] < 0:
+		icon = icons.down
+
+	icons.drawIcon(max_width + 1, 1, icon, data_window);
+
 	data_window.refresh();
 
 def draw_menu_select(menu_window, item, direction):
@@ -122,7 +130,7 @@ if __name__ == '__main__':
 	draw_menu_select(menu_window, 0, 1)
 
 	#okno pro zobrazeni dat zvolene zeme
-	data_window = curses.newwin(rows, 30, 0, max_width + 1)
+	data_window = curses.newwin(rows, columns - (max_width + 1), 0, max_width + 1)
 	draw_country_data(data_window, json_data, config['config']['countries'][0])
 
 	while True:
